@@ -28,7 +28,7 @@
             margin: 20px auto;
             position: relative;
             /* The width/height will be determined by the scaled content */
-            transform-origin: top center;
+            transform-origin: top left;
         }
 
         /* A4 Paper Simulation */
@@ -326,7 +326,7 @@
             
             // Apply scale
             container.style.transform = `scale(${scale})`;
-            container.style.transformOrigin = 'top center';
+            container.style.transformOrigin = 'top left';
             
             // Adjust the height of the viewer container so the footer isn't cut off or too much whitespace
             // The scaled height will be less than original height
