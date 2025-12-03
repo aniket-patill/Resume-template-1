@@ -2,35 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Added maximum-scale to prevent auto-zoom glitches on reload -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Padam Bhansali - Resume</title>
     <style>
         /* ---------------------------------------------------------
-           CORE PAGE SETUP (VW BASED SCALING)
+           CORE VARIABLES
            --------------------------------------------------------- */
-        :root {          
-            --theme-blue: #4f81bc;
-            --theme-border: #1f3855;
-            --bg-viewer: #dee3e7;
+        :root {
+            --blue-header: #4f81bc;
+            --border-color: #000000;
+            --text-black: #000000;
+            --bg-white: #ffffff;
+            --font-main: 'Times New Roman', Times, serif;
+            --viewer-bg: #525659;
 
-            /* Dimensions */
-            --page-width: 96vw;
-            --page-height: 135.75vw; /* 96 * 1.4142 */
-            --page-padding-top: 3.8vw;  /* approx 30px */
-            --page-padding-side: 5vw;   /* approx 40px */
+            /* A4 DIMENSIONS (Fixed Reference) */
+            --ref-width: 1000px;
+            --ref-height: 1414px; /* 1:1.414 Ratio */
             
-            /* Typography (Calculated relative to 96vw container) */
-            --font-h1: 3.1vw;       /* ~25px */
-            --font-h-section: 1.6vw;/* ~13px */
-            --font-body: 1.7vw;     /* ~14px */
-            --font-small: 1.6vw;    /* ~13px */
-            
-            /* Spacing */
-            --margin-bottom-p: 0.2vw;
-            --line-height: 1.2;
+            /* DYNAMIC SCALING FACTOR (Controlled by JS for shrinking content) */
+            --content-scale: 1; 
         }
 
-        /* Prevent font scaling on mobile to keep layout strict */
         html {
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
@@ -45,85 +39,82 @@
         }
 
         body {
-            background-color: var(--bg-viewer);
-            font-family: "Times New Roman", Times, serif;
-            margin: 0;
-            padding: 0;
+            background-color: var(--viewer-bg);
+            font-family: var(--font-main);
+            overflow-x: hidden; /* Vital */
             min-height: 100vh;
-            overflow-x: hidden;
+            width: 100vw;
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* ---------------------------------------------------------
-           VIEWER & PAGE CONTAINER
-           --------------------------------------------------------- */
-        #viewer-container {
-            margin-top: 2.5vw;
-            margin-bottom: 2.5vw;
-            display: flex;
-            flex-direction: column;
-            gap: 2.5vw; /* Space between pages */
-            width: var(--page-width);
-        }
-
-        /* The A4 Page Class */
-        .cv-page {
-            background-color: white;
-            width: var(--page-width);
-            height: var(--page-height);
-            padding: var(--page-padding-top) var(--page-padding-side);
-            box-shadow: 0 0 2vw rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0; 
-        }
-
-        /* Internal content area to detect overflow */
-        .content-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        /* WRAPPER FIX: 
+           This isolates the large 1000px page from the viewport.
+           The browser only sees this container (width: 100%), so it won't 
+           auto-zoom to fit the huge 1000px child.
+        */
+        #zoom-wrapper {
             width: 100%;
-            overflow: hidden;
-        }
-
-        /* Hidden Source for JS to pull from */
-        #source-content {
-            display: none;
+            overflow: hidden; /* Hides the overflow of the scaled element */
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
         /* ---------------------------------------------------------
-           RESUME STYLING
+           THE SHEET (A4 CONTAINER)
            --------------------------------------------------------- */
-        
-        /* Helpers */
+        .resume-container {
+            /* Fixed Dimensions based on reference */
+            width: var(--ref-width);
+            height: var(--ref-height);
+            background: var(--bg-white);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            
+            /* Initial Padding (Scaled by content-scale) */
+            padding: calc(25px * var(--content-scale)) calc(25px * var(--content-scale));
+            
+            display: flex;
+            flex-direction: column;
+            
+            /* Prevent flexbox from squashing the width */
+            flex-shrink: 0; 
+
+            /* Origin for transform scaling */
+            transform-origin: top center;
+            
+            /* Base font size scaling */
+            font-size: calc(16px * var(--content-scale));
+        }
+
+        /* Helper Classes */
         .bold { font-weight: bold; }
         .underline { text-decoration: underline; }
         .justify { text-align: justify; }
         .right { text-align: right; }
         .center { text-align: center; }
-        
-        /* Header */
+        .uppercase { text-transform: uppercase; }
+
+        /* Header Section */
         header {
             text-align: center;
-            margin-bottom: 1.25vw;
-            flex-shrink: 0;
+            margin-bottom: calc(10px * var(--content-scale));
         }
 
         h1 {
-            font-size: var(--font-h1);
+            font-size: calc(35px * var(--content-scale));
             font-weight: 900;
             text-decoration: underline;
-            margin-bottom: 0.5vw;
+            margin-bottom: calc(4px * var(--content-scale));
             text-transform: none;
         }
 
         .contact-info {
-            font-size: var(--font-small);
+            font-size: calc(18px * var(--content-scale));
         }
 
         .contact-info a {
@@ -133,35 +124,35 @@
 
         /* Section Headers */
         .section-header {
-            background-color: var(--theme-blue);
+            background-color: var(--blue-header);
             color: white;
-            padding: 0.25vw 0.6vw;
+            padding: calc(2px * var(--content-scale)) calc(5px * var(--content-scale));
             font-weight: bold;
-            font-size: var(--font-h-section);
+            font-size: calc(16px * var(--content-scale));
             text-transform: uppercase;
-            border: 0.12vw solid var(--theme-border);
-            margin-top: 0.2vw;
-            margin-bottom: 0.2vw;
+            border: 1px solid #1f3855;
+            margin-top: calc(12px * var(--content-scale));
+            margin-bottom: calc(5px * var(--content-scale));
         }
 
-        /* Paragraphs & Text */
+        /* Content Text */
         p {
-            margin-bottom: var(--margin-bottom-p);
-            font-size: var(--font-body);
-            line-height: var(--line-height);
+            margin-bottom: calc(5px * var(--content-scale));
+            font-size: calc(19px * var(--content-scale));
+            line-height: 1.4;
         }
 
-        /* Tables */
+        /* Educational Table */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: var(--font-small);
-            margin-bottom: 0.3vw;
+            font-size: calc(19px * var(--content-scale));
+            margin-bottom: calc(5px * var(--content-scale));
         }
 
         th, td {
-            border: 0.12vw solid black;
-            padding: 0.25vw 0.6vw;
+            border: 1px solid black;
+            padding: calc(2px * var(--content-scale)) calc(5px * var(--content-scale));
             vertical-align: top;
         }
 
@@ -176,45 +167,39 @@
         .col-inst { width: 40%; text-align: center; }
         .col-marks { width: 25%; text-align: center; }
 
-        .cell-center {
-            text-align: center;
-            vertical-align: middle;
-            padding: 0.12vw 0;
-        }
-        .cell-center > div {
-            display: inline-block;
-            margin: 0 auto;
-        }
-
-        /* Work Experience Headers */
+        /* Work Experience */
         .job-header {
             display: flex;
             justify-content: space-between;
             font-weight: bold;
-            font-size: var(--font-small);
-            margin-top: 0.1vw;
-            margin-bottom: 0.2vw;
-            border-bottom: 0.12vw solid black;
+            font-size: calc(19px * var(--content-scale));
+            margin-top: calc(5px * var(--content-scale));
+            margin-bottom: calc(2px * var(--content-scale));
+            border-bottom: none;
+        }
+        
+        .job-title {
+            text-decoration: underline;
         }
 
         /* Lists */
         ul {
             list-style-type: disc;
-            margin-left: 3.1vw;
-            margin-bottom: 0.6vw;
+            margin-left: calc(25px * var(--content-scale));
+            margin-bottom: calc(5px * var(--content-scale));
         }
 
         li {
-            font-size: var(--font-small);
-            margin-bottom: 0.25vw;
+            font-size: calc(17.8px * var(--content-scale));
+            margin-bottom: calc(2px * var(--content-scale));
             text-align: justify;
-            padding-right: 0.6vw;
-            line-height: var(--line-height);
+            padding-right: calc(5px * var(--content-scale));
+            line-height: 1.3;
         }
 
         /* Nested Lists */
         ul ul {
-            margin-left: 2.5vw;
+            margin-left: calc(20px * var(--content-scale));
             list-style-type: none;
         }
         
@@ -223,252 +208,275 @@
             font-weight: bold;
         }
 
+        .cell-center {
+            text-align: center;
+            vertical-align: middle;
+            padding: calc(1px * var(--content-scale)) 0;
+        }
+        .cell-center > div {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
         /* ---------------------------------------------------------
-           PRINT STYLES - RESTORE PHYSICAL UNITS
+           PRINT STYLES - STRICT SINGLE PAGE A4
            --------------------------------------------------------- */
         @media print {
             @page {
-                margin: 0; /* Eliminate browser default margins */
-                size: auto; 
+                size: A4 portrait;
+                margin: 0;
             }
 
+            html,
             body {
-                background: white;
-                display: block; /* Remove flex centering to avoid print layout issues */
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow: visible;
+                width: 210mm;
+                height: 297mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: #ffffff !important;
             }
 
-            .pdf-viewer {
-                padding: 0;
-                margin: 0;
-                display: block;
-                width: 100%;
+            #zoom-wrapper {
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                transform: none !important; /* Reset transform */
             }
 
-            .cv-page {
-                margin: 0;
-                padding: 2vw 3vw; /* Keep internal padding */
-                box-shadow: none;
-                width: 100%;
-                height: auto; /* Let content flow naturally on paper to avoid cutting off */
-                min-height: 100%; /* Ensure it fills the page */
-                page-break-after: always;
-                border: none;
-                left: 0;
-                top: 0;
-            }
-
-            /* Remove break after the last page to prevent blank sheet */
-            .cv-page:last-child {
-                page-break-after: auto;
+            .resume-container {
+                width: 1000px !important; /* Keep design width */
+                /* height: 1414px !important;  Keep design height */
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                border: none !important;
+                
+                /* SCALE TO A4 */
+                /* 210mm / 1000px = ~0.7937 */
+                zoom: 0.7937; 
+                -moz-transform: scale(0.7937);
+                -moz-transform-origin: top center;
+                
+                /* Reset other transforms */
+                transform: none !important; 
+                position: static !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- VISIBLE VIEWER (Pages injected here) -->
-    <div id="viewer-container"></div>
+    <!-- WRAPPER FIX -->
+    <div id="zoom-wrapper">
+        <!-- SINGLE A4 PAGE -->
+        <div class="resume-container" id="cv-page">
+            <header>
+                <h1>Padam Bhansali</h1>
+                <div class="contact-info">
+                    +91 7228881182 | <a href="mailto:capadambhansali@gmail.com">capadambhansali@gmail.com</a> | Mumbai
+                </div>
+            </header>
 
-    <!-- RAW CONTENT SOURCE (Hidden) -->
-    <div id="source-content">
-        <header>
-            <h1>Padam Bhansali</h1>
-            <div class="contact-info">
-                +91 7228881182 | <a href="mailto:capadambhansali@gmail.com">capadambhansali@gmail.com</a> | Mumbai
+            <div class="section-header">CAREER OBJECTIVE</div>
+            <p class="justify">To associate myself with an Industrial training opportunity with an organization that puts my knowledge and practical understanding to utmost use and helps achieve maximum goals for the organization.</p>
+
+            <div class="section-header ">EDUCATIONAL QUALIFICATION</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-course">Course</th>
+                        <th class="col-year">Year</th>
+                        <th class="col-inst">Institution</th>
+                        <th class="col-marks">Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                        <td class="cell-center"><div>CA Intermediate</div></td>
+                        <td class="cell-center"><div>2023</div></td>
+                        <td class="cell-center"><div>ICAI</div></td>
+                        <td class="cell-center"><div>429/800<br>(Exemption : Financial Management)</div></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-center"><div>CA Foundation</div></td>
+                        <td class="cell-center"><div>2021</div></td>
+                        <td class="cell-center"><div>ICAI</div></td>
+                        <td class="cell-center"><div>271/400<br>(Exemption in all 4 subjects)</div></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-center"><div>Bachelor of Commerce</div></td>
+                        <td class="cell-center"><div>March, 2023</div></td>
+                        <td class="cell-center"><div>Mithibai College of Arts, Science & Commerce</div></td>
+                        <td class="cell-center"><div>CGPA 8.11</div></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-center"><div>HSC - Class XII</div></td>
+                        <td class="cell-center"><div>March, 2020</div></td>
+                        <td class="cell-center"><div>Mithibai College of Arts, Science & Commerce</div></td>
+                        <td class="cell-center"><div>445/500 (89%)</div></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-center"><div>ICSE - Class X</div></td>
+                        <td class="cell-center"><div>March, 2018</div></td>
+                        <td class="cell-center"><div>Cambridge School (Ryan International Group)</div></td>
+                        <td class="cell-center"><div>450/500 (90%)</div></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-header">WORK EXPERIENCE</div>
+
+            <div class="job-header" style="border-bottom: 1px solid black;">
+                <span><span >Article Assistant</span> | <span class="bold">JMMK & Co. (Grrowwide Group)</span> | Mumbai</span>
+                <span>(February 2024 – Present)</span>
             </div>
-        </header>
+            <ul>
+                <li><span class="bold">Statutory Audit:</span> Led end-to-end statutory audit process for multiple clients across various industries. Assisted in the process of <span class="bold">Restatement of Financial Statements</span> and prepared <span class="bold">standalone</span> and <span class="bold">consolidated</span> financial statements, drafted audit reports, identifying key findings and areas for improvement.</li>
+                <li><span class="bold">Direct Tax:</span> Supported tax audits for clients, ensuring compliance with direct tax regulations and assisted in Income Tax computation during Tax season.</li>
+                <li><span class="bold">Indirect Tax:</span> Computed and filed <span class="bold">GSTR-1, GSTR-3B, GST 9 & 9C</span> returns ensuring timely and accurate submission during the GST season. Managed the preparation and filing of Professional Tax returns, ensuring full compliance with state regulations.</li>
+            </ul>
 
-        <div class="section-header">CAREER OBJECTIVE</div>
-        <p class="justify">To associate myself with an Industrial training opportunity with an organization that puts my knowledge and practical understanding to utmost use and helps achieve maximum goals for the organization.</p>
+            <div class="job-header" style="border-bottom: 1px solid black;">
+                <span><span >Merchant Banking Internship</span> | <span class="bold">Bonanza Portfolio Ltd.</span> | Mumbai</span>
+                <span>(June 2023 – July 2023)</span>
+            </div>
+            <ul>
+                <li>Conducted comprehensive company valuations, including preparing <span class="bold">Discounted Cash Flow (DCF)</span> models to assess business value and investment potential. Developed and projected future cash flows to support financial forecasting and strategic decision-making. Assisted in the <span class="bold">private placement</span> process of <span class="bold">Non-Convertible Debentures (NCDs)</span>, preparing investor presentations and ensuring regulatory compliance, improved Excel learning.</li>
+            </ul>
 
-        <div class="section-header">EDUCATIONAL QUALIFICATION</div>
-        <table>
-            <thead>
-                <tr>
-                    <th class="col-course">Course</th>
-                    <th class="col-year">Year</th>
-                    <th class="col-inst">Institution</th>
-                    <th class="col-marks">Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                 <tr>
-                    <td class="cell-center"><div>CA Intermediate</div></td>
-                    <td class="cell-center"><div>2023</div></td>
-                    <td class="cell-center"><div>ICAI</div></td>
-                    <td class="cell-center"><div>429/800<br>(Exemption : Financial Management)</div></td>
-                </tr>
-                <tr>
-                    <td class="cell-center"><div>CA Foundation</div></td>
-                    <td class="cell-center"><div>2021</div></td>
-                    <td class="cell-center"><div>ICAI</div></td>
-                    <td class="cell-center"><div>271/400<br>(Exemption in all 4 subjects)</div></td>
-                </tr>
-                <tr>
-                    <td class="cell-center"><div>Bachelor of Commerce</div></td>
-                    <td class="cell-center"><div>March, 2023</div></td>
-                    <td class="cell-center"><div>Mithibai College of Arts, Science & Commerce</div></td>
-                    <td class="cell-center"><div>CGPA 8.11</div></td>
-                </tr>
-                <tr>
-                    <td class="cell-center"><div>HSC - Class XII</div></td>
-                    <td class="cell-center"><div>March, 2020</div></td>
-                    <td class="cell-center"><div>Mithibai College of Arts, Science & Commerce</div></td>
-                    <td class="cell-center"><div>445/500 (89%)</div></td>
-                </tr>
-                <tr>
-                    <td class="cell-center"><div>ICSE - Class X</div></td>
-                    <td class="cell-center"><div>March, 2018</div></td>
-                    <td class="cell-center"><div>Cambridge School (Ryan International Group)</div></td>
-                    <td class="cell-center"><div>450/500 (90%)</div></td>
-                </tr>
-            </tbody>
-        </table>
+            <div class="section-header">LEADERSHIP, INTERESTS AND COMMUNITY ENGAGEMENT</div>
+            <ul>
+                <li><span class="bold">Mithibai Entrepreneurship Development Cell</span> - Sub-Head of Logistics, overseeing event coordination and logistics management.</li>
+                <li><span class="bold">Presentations and Public Speaking</span> - Recognition for presentations in school, college and OC training , anchoring for school events and assemblies.</li>
+                <li><span class="bold">Member of Public Relations</span> team for college fest Kshitij.</li>
+                <li><span class="bold">International Cultural Engagement</span> - Participated in World wide level Theatre Cultural festival in school, hosted international exchange students fostering cross-cultural understanding and communication.</li>
+                <li><span class="bold">Academic Projects</span>
+                    <ul style="list-style-type: none; margin-left: 2;">
+                        <li><span class="bold">Field Visit (2022)</span> - Visited a public limited company to understand the working of their HR department.</li>
+                        <li><span class="bold">Start-up Pitch (2022)</span> - Presentation pitch on a start-up idea as a part of entrepreneurship management.</li>
+                    </ul>
+                </li>
+            </ul>
 
-        <div class="section-header">WORK EXPERIENCE</div>
+            <div class="section-header">ACHIEVEMENTS</div>
+            <ul>
+                <li>Awarded for Best Presentation in school, Best host for Assembly, Won elocution competitions.</li>
+                <li>First place in Throwball competition - (2019), (2024).</li>
+                <li>Completed Level 4 in Bharatnatyam, showcasing skills in classical dance.</li>
+                <li>Awarded in school for securing 100 in Maths for two consecutive semesters.</li>
+            </ul>
 
-        <div class="job-header">
-            <span><span >Article Assistant</span> | <span class="bold">JMMK & Co. (Grrowwide Group)</span> | Mumbai</span>
-            <span>(February 2024 – Present)</span>
+            <div class="section-header">SKILLS</div>
+            <ul>
+                <li>Presentation skills, Public speaking, Leadership skills, Communication skills.</li>
+                <li>Software Proficiency: Proficient in MS Excel, PPT, ERP systems like Tally Prime-ERP.</li>
+            </ul>
+
         </div>
-        <ul>
-            <li><span class="bold">Statutory Audit:</span> Led end-to-end statutory audit process for multiple clients across various industries. Assisted in the process of <span class="bold">Restatement of Financial Statements</span> and prepared <span class="bold">standalone</span> and <span class="bold">consolidated</span> financial statements, drafted audit reports, identifying key findings and areas for improvement.</li>
-            <li><span class="bold">Direct Tax:</span> Supported tax audits for clients, ensuring compliance with direct tax regulations and assisted in Income Tax computation during Tax season.</li>
-            <li><span class="bold">Indirect Tax:</span> Computed and filed <span class="bold">GSTR-1, GSTR-3B, GST 9 & 9C</span> returns ensuring timely and accurate submission during the GST season. Managed the preparation and filing of Professional Tax returns, ensuring full compliance with state regulations.</li>
-        </ul>
-
-        <div class="job-header">
-            <span><span >Merchant Banking Internship</span> | <span class="bold">Bonanza Portfolio Ltd.</span> | Mumbai</span>
-            <span>(June 2023 – July 2023)</span>
-        </div>
-        <ul>
-            <li>Conducted comprehensive company valuations, including preparing <span class="bold">Discounted Cash Flow (DCF)</span> models to assess business value and investment potential. Developed and projected future cash flows to support financial forecasting and strategic decision-making. Assisted in the <span class="bold">private placement</span> process of <span class="bold">Non-Convertible Debentures (NCDs)</span>, preparing investor presentations and ensuring regulatory compliance, improved Excel learning.</li>
-        </ul>
-
-        <div class="section-header">LEADERSHIP, INTERESTS AND COMMUNITY ENGAGEMENT</div>
-        <ul>
-            <li><span class="bold">Mithibai Entrepreneurship Development Cell</span> - Sub-Head of Logistics, overseeing event coordination and logistics management.</li>
-            <li><span class="bold">Presentations and Public Speaking</span> - Recognition for presentations in school, college and OC training , anchoring for school events and assemblies.</li>
-            <li><span class="bold">Member of Public Relations</span> team for college fest Kshitij.</li>
-            <li><span class="bold">International Cultural Engagement</span> - Participated in World wide level Theatre Cultural festival in school, hosted international exchange students fostering cross-cultural understanding and communication.</li>
-            <li><span class="bold">Academic Projects</span>
-                <ul style="list-style-type: none; margin-left: 2;">
-                    <li><span class="bold">Field Visit (2022)</span> - Visited a public limited company to understand the working of their HR department.</li>
-                    <li><span class="bold">Start-up Pitch (2022)</span> - Presentation pitch on a start-up idea as a part of entrepreneurship management.</li>
-                </ul>
-            </li>
-        </ul>
-
-        <div class="section-header">ACHIEVEMENTS</div>
-        <ul>
-            <li>Awarded for Best Presentation in school, Best host for Assembly, Won elocution competitions.</li>
-            <li>First place in Throwball competition - (2019), (2024).</li>
-            <li>Completed Level 4 in Bharatnatyam, showcasing skills in classical dance.</li>
-            <li>Awarded in school for securing 100 in Maths for two consecutive semesters.</li>
-        </ul>
-
-        <div class="section-header">SKILLS</div>
-        <ul>
-            <li>Presentation skills, Public speaking, Leadership skills, Communication skills.</li>
-            <li>Software Proficiency: Proficient in MS Excel, PPT, ERP systems like Tally Prime-ERP.</li>
-        </ul>
     </div>
 
-    <!-- PAGINATION LOGIC -->
+    <!-- SCRIPT -->
     <script>
-        // Pagination logic remains the same, but now operates on VW-sized elements.
-        // It reads 'scrollHeight' which is computed in pixels by the browser, 
-        // ensuring accurate cuts regardless of the units used in CSS.
-        function paginateCV() {
-            const source = document.getElementById('source-content');
-            const viewer = document.getElementById('viewer-container');
-            
-            viewer.innerHTML = ''; // Clear existing
-            const nodes = Array.from(source.children);
-            
-            let currentPage = createPage();
-            viewer.appendChild(currentPage);
-            let contentArea = currentPage.querySelector('.content-area');
+        // 1. SCALING LOGIC (Visual Zoom)
+        function scaleToFit() {
+            const page = document.getElementById('cv-page');
+            const wrapper = document.getElementById('zoom-wrapper');
+            const windowWidth = window.innerWidth;
+            const targetWidth = windowWidth - 20; // 10px padding on each side for mobile feeling
+            const refWidth = 1000; // The fixed width of our .cv-page in CSS
 
-            for (let i = 0; i < nodes.length; i++) {
-                const node = nodes[i].cloneNode(true);
-                contentArea.appendChild(node);
+            let scale = 1;
+            
+            // Only scale down if screen is smaller than reference
+            if (targetWidth < refWidth) {
+                scale = targetWidth / refWidth;
+            }
 
-                if (hasOverflow(contentArea)) {
-                    contentArea.removeChild(node);
-                    
-                    if (node.tagName === 'TABLE') {
-                        splitTable(node, currentPage, viewer);
-                        const pages = viewer.querySelectorAll('.cv-page');
-                        currentPage = pages[pages.length - 1];
-                        contentArea = currentPage.querySelector('.content-area');
-                    } else {
-                        currentPage = createPage();
-                        viewer.appendChild(currentPage);
-                        contentArea = currentPage.querySelector('.content-area');
-                        contentArea.appendChild(node);
-                    }
-                }
+            page.style.transform = `scale(${scale})`;
+            
+            // Adjust margin bottom to remove whitespace created by scaling
+            const refHeight = 1414;
+            const currentVisualHeight = refHeight * scale;
+            const spaceToRemove = refHeight - currentVisualHeight;
+            page.style.marginBottom = `-${spaceToRemove}px`;
+        }
+
+        // 2. SHRINK TO FIT LOGIC (Content Compression)
+        function shrinkContentToFit() {
+            const page = document.getElementById('cv-page');
+            const maxHeight = 1414; 
+            
+            let contentScale = 1;
+            document.documentElement.style.setProperty('--content-scale', contentScale);
+
+            let iterations = 0;
+            while (page.scrollHeight > maxHeight && iterations < 50) {
+                contentScale -= 0.02; 
+                document.documentElement.style.setProperty('--content-scale', contentScale);
+                iterations++;
             }
         }
 
-        function createPage() {
-            const page = document.createElement('div');
-            page.className = 'cv-page';
-            const content = document.createElement('div');
-            content.className = 'content-area';
-            page.appendChild(content);
-            return page;
+        let screenTransform = '';
+        let screenMarginBottom = '';
+
+        function enablePrintMode() {
+            const page = document.getElementById('cv-page');
+            screenTransform = page.style.transform;
+            screenMarginBottom = page.style.marginBottom;
+            document.body.classList.add('print-mode');
+
+            page.style.transform = 'scale(1)';
+            page.style.marginBottom = '0px';
+
+            shrinkContentToFit();
         }
 
-        function hasOverflow(element) {
-            // Tolerance for VW sub-pixel rendering issues
-            return Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) + 2;
+        function handlePrintChange(e) {
+            if (e.matches) {
+                enablePrintMode();
+            } else {
+                disablePrintMode();
+            }
         }
 
-        function splitTable(tableNode, currentPage, viewer) {
-            const rows = Array.from(tableNode.querySelectorAll('tbody tr'));
-            
-            let currentTable = tableNode.cloneNode(true);
-            currentTable.querySelector('tbody').innerHTML = '';
-            
-            let contentArea = currentPage.querySelector('.content-area');
-            contentArea.appendChild(currentTable);
-            let tbody = currentTable.querySelector('tbody');
+        function disablePrintMode() {
+            const page = document.getElementById('cv-page');
+            document.body.classList.remove('print-mode');
 
-            rows.forEach(row => {
-                const newRow = row.cloneNode(true);
-                tbody.appendChild(newRow);
+            page.style.transform = screenTransform || '';
+            page.style.marginBottom = screenMarginBottom || '';
 
-                if (hasOverflow(contentArea)) {
-                    tbody.removeChild(newRow);
-                    
-                    const newPage = createPage();
-                    viewer.appendChild(newPage);
-                    contentArea = newPage.querySelector('.content-area');
-
-                    currentTable = tableNode.cloneNode(true);
-                    currentTable.querySelector('tbody').innerHTML = '';
-                    contentArea.appendChild(currentTable);
-                    tbody = currentTable.querySelector('tbody');
-                    
-                    tbody.appendChild(newRow);
-                }
-            });
+            scaleToFit();
         }
 
-        // Init & Debounce Resize
-        window.onload = paginateCV;
+        function init() {
+            shrinkContentToFit(); 
+            scaleToFit();
+
+            const printMedia = window.matchMedia('print');
+            if (printMedia.addEventListener) {
+                printMedia.addEventListener('change', handlePrintChange);
+            } else if (printMedia.addListener) {
+                printMedia.addListener(handlePrintChange);
+            }
+
+            window.addEventListener('beforeprint', enablePrintMode);
+            window.addEventListener('afterprint', disablePrintMode);
+        }
+
+        window.addEventListener('load', init);
+        
         let resizeTimer;
-        window.onresize = function() {
+        window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(paginateCV, 100);
-        };
+            resizeTimer = setTimeout(scaleToFit, 100); 
+        });
     </script>
 </body>
 </html>
