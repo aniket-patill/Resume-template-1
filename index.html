@@ -227,54 +227,44 @@
            PRINT STYLES - RESTORE PHYSICAL UNITS
            --------------------------------------------------------- */
         @media print {
-            :root {
-                --page-width: 210mm;
-                --page-height: 297mm;
-                --page-padding-top: 30px;
-                --page-padding-side: 40px;
-                
-                --font-h1: 25pt;
-                --font-h-section: 12pt;
-                --font-body: 12pt;
-                --font-small: 11pt;
-                
-                --margin-bottom-p: 5pt;
-            }
-
             @page {
-                margin: 0;
-                size: auto;
+                margin: 0; /* Eliminate browser default margins */
+                size: auto; 
             }
 
             body {
-                background-color: white;
-                display: block;
+                background: white;
+                display: block; /* Remove flex centering to avoid print layout issues */
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: visible;
             }
 
-            #viewer-container {
+            .pdf-viewer {
+                padding: 0;
                 margin: 0;
-                width: 100%;
                 display: block;
-                gap: 0;
+                width: 100%;
             }
 
             .cv-page {
                 margin: 0;
+                padding: 2vw 3vw; /* Keep internal padding */
                 box-shadow: none;
-                page-break-after: always;
                 width: 100%;
-                height: auto;
-                min-height: 100%;
+                height: auto; /* Let content flow naturally on paper to avoid cutting off */
+                min-height: 100%; /* Ensure it fills the page */
+                page-break-after: always;
                 border: none;
+                left: 0;
+                top: 0;
             }
 
+            /* Remove break after the last page to prevent blank sheet */
             .cv-page:last-child {
                 page-break-after: auto;
-            }
-            
-            /* Reset borders to be thin in print */
-            th, td, .section-header, .job-header {
-                border-width: 1px !important;
             }
         }
     </style>
